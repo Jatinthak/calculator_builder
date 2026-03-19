@@ -1,0 +1,49 @@
+```yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Linting
+        run: |
+          npm run lint
+
+      - name: Run tests
+        run: |
+          npm run test
+
+      - name: Build Docker image
+        run: |
+          docker build -t calculator-builder .
+
+      - name: Deploy frontend to Vercel
+        if: github.event.branch == 'main'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npm run deploy-frontend
+
+      - name: Deploy backend to Render
+        if: github.event.branch == 'main'
+        env:
+          RENDER_TOKEN: ${{ secrets.RENDER_TOKEN }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          npm run deploy-backend
+```
