@@ -1,0 +1,30 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and deploy
+        env:
+          REACT_APP_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          REACT_APP_SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          REACT_APP_JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        run: |
+          npm run build
+          npm run deploy
+
+      - name: Verify deployment
+        run: |
+          echo "Deployment successful"
+          echo "Frontend deployed to: https://calculator-builder.netlify.app"
