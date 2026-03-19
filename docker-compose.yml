@@ -1,0 +1,95 @@
+```yml
+version: '3'
+
+services:
+  frontend:
+    build: ./frontend
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_KEY=${SUPABASE_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - DATABASE_URL=postgres://postgres:postgres@database:5432/postgres
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    depends_on:
+      - database
+    healthcheck:
+      test: ["curl", "-f", "http://localhost:8080/api/healthcheck"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  database:
+    image: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - database-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  database-data:
+```
+Note: This `docker-compose.yml` file assumes that you have a `Dockerfile` in both your frontend and backend directories. The `Dockerfile` should contain the necessary instructions to build your application. 
+
+For example, your `frontend/Dockerfile` might look like this:
+```dockerfile
+FROM node:16
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+```
+
+And your `backend/Dockerfile` might look like this:
+```dockerfile
+FROM node:16
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+EXPOSE 8080
+
+CMD ["node", "server.js"]
+```
