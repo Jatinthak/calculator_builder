@@ -1,0 +1,13 @@
+# This file is not used in this project, but included for completeness
+# The project uses npm and package.json for dependency management, 
+# so this requirements.txt file is not necessary.
+
+# If this were a Python project, the requirements would be listed here, 
+# one per line, in the format:
+# package-name==version
+
+# For example:
+# flask==2.0.1
+# sqlalchemy==1.4.26
+
+# Since this is a Node.js project, there are no requirements to list here.
